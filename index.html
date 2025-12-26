@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Squad Auditor - IA para seu Código</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+          }
+        }
+      }
+    </script>
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-track { background: #0a0a0c; }
+      ::-webkit-scrollbar-thumb { background: #2d2d35; border-radius: 5px; border: 2px solid #0a0a0c; }
+      ::-webkit-scrollbar-thumb:hover { background: #3f3f4a; }
+      .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+      .gradient-border { border-image: linear-gradient(to right, #6366f1, #a855f7) 1; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "jszip": "https://esm.sh/jszip@3.10.1",
+    "prettier": "https://esm.sh/prettier@3.2.5/standalone",
+    "prettier/parser-babel": "https://esm.sh/prettier@3.2.5/plugins/babel",
+    "prettier/parser-estree": "https://esm.sh/prettier@3.2.5/plugins/estree",
+    "prettier/": "https://esm.sh/prettier@^3.7.4/"
+  }
+}
+</script>
+</head>
+  <body class="bg-[#050508] text-gray-200">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "name": "AI Code Refactor",
+  "description": "An application that uses the Gemini API to analyze React code pasted by the user and suggests improvements for quality, performance, and best practices.",
+  "requestFramePermissions": []
+}
