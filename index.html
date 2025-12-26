@@ -26,6 +26,33 @@
       ::-webkit-scrollbar-thumb:hover { background: #3f3f4a; }
       .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
       .gradient-border { border-image: linear-gradient(to right, #6366f1, #a855f7) 1; }
+
+      @media print {
+        header, aside, .no-print {
+          display: none !important;
+        }
+        body {
+          background: white !important;
+          color: black !important;
+          overflow: visible !important;
+        }
+        main {
+          overflow: visible !important;
+          height: auto !important;
+        }
+        .report-content {
+          margin: 0 !important;
+          padding: 20px !important;
+          width: 100% !important;
+          max-width: none !important;
+        }
+        .printable-page {
+          background: white !important;
+          padding: 0 !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
+      }
     </style>
   <script type="importmap">
 {
