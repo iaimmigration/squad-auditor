@@ -21,6 +21,8 @@ const getPromptForRole = (role: AgentRole, code: string, context?: string, userM
     - É PROIBIDO inventar funcionalidades ou elementos visuais que não existam no código.
     - Se o código não define uma cor ou layout, descreva como "Padrão do Navegador/Framework".
     - Contexto do Projeto: ${fileMap}.
+    
+    OBRIGATÓRIO: Ao final de sua análise, você DEVE incluir uma seção chamada "### LISTA DE SUGESTÕES DE MELHORIA" com pontos acionáveis (bullet points) para consertar ou otimizar o código analisado.
   `;
   
   const prompts: Record<AgentRole, string> = {
@@ -49,11 +51,10 @@ const getPromptForRole = (role: AgentRole, code: string, context?: string, userM
       
       PARA O 'imagePrompt':
       Crie uma descrição técnica para um gerador de diagramas. 
-      Exemplo: "Wireframe de alta fidelidade de um Dashboard: Sidebar cinza escuro à esquerda com ícones, área central branca com 3 cards de métricas no topo e um gráfico de linhas abaixo."
       Foque em ESTRUTURA, não em estilo artístico.`,
 
     BUSINESS_VISIONARY: `${systemBase}
-      MISS_O: CPO & Estrategista. Analise market fit e maturidade comercial baseada no código.`,
+      MISSÃO: CPO & Estrategista. Analise market fit e maturidade comercial baseada no código.`,
 
     ORCHESTRATOR: `${systemBase}
       MISSÃO: Refatoração de Produção.
@@ -104,19 +105,24 @@ export const runAgentStep = async (role: AgentRole, code: string, context?: stri
             items: {
               type: Type.OBJECT,
               properties: {
-                step: { type: Type.STRING, description: "Nome do componente ou seção (ex: Barra de Navegação)." },
-                verdict: { type: Type.STRING, description: "Análise técnica do impacto visual deste elemento." },
-                imagePrompt: { type: Type.STRING, description: "Descrição detalhada do wireframe para geração de imagem." }
+                step: { type: Type.STRING, description: "Nome do componente ou seção." },
+                verdict: { type: Type.STRING, description: "Análise técnica do impacto visual." },
+                imagePrompt: { type: Type.STRING, description: "Descrição do wireframe para geração de imagem." }
               },
               required: ["step", "verdict", "imagePrompt"]
             }
           },
+          improvements: {
+            type: Type.ARRAY,
+            description: "Lista de sugestões técnicas de melhoria para a UI/UX baseada no código.",
+            items: { type: Type.STRING }
+          },
           finalReport: { 
             type: Type.STRING, 
-            description: "Conclusão da auditoria visual sobre a eficácia da UI." 
+            description: "Conclusão da auditoria visual." 
           }
         },
-        required: ["valueProposition", "persona", "steps", "finalReport"]
+        required: ["valueProposition", "persona", "steps", "improvements", "finalReport"]
       };
     }
 
