@@ -12,10 +12,28 @@ export type AgentRole =
   | 'INFRA_SCALABILITY'
   | 'CHAT';
 
-const getPromptForRole = (role: AgentRole, code: string, context?: string, userMessage?: string): string => {
+export type AuditorPersona = 'SENIOR' | 'SECURITY' | 'PRODUCT' | 'CLEAN_CODE';
+
+const getPersonaInstruction = (persona: AuditorPersona): string => {
+  switch (persona) {
+    case 'SECURITY':
+      return "Você é um Especialista em Cibersegurança (Red Team). Seu foco é encontrar falhas, injeções, vazamentos de dados e vulnerabilidades críticas.";
+    case 'PRODUCT':
+      return "Você é um CPO e Estrategista de Produto. Seu foco é no valor de negócio, retenção de usuário, clareza da proposta e UX estratégica.";
+    case 'CLEAN_CODE':
+      return "Você é um Purista de Software. Seu foco absoluto é SOLID, DRY, Clean Code e padrões de projeto para manutenção a longo prazo.";
+    case 'SENIOR':
+    default:
+      return "Você é um Arquiteto de Software Sênior. Sua visão é técnica, equilibrada entre performance, legibilidade e padrões modernos.";
+  }
+};
+
+const getPromptForRole = (role: AgentRole, code: string, context?: string, userMessage?: string, persona: AuditorPersona = 'SENIOR'): string => {
   const fileMap = context || 'Contexto não fornecido';
+  const personaBase = getPersonaInstruction(persona);
   
   const systemBase = `
+    ${personaBase}
     VOCÊ É UM AUDITOR DE ENGENHARIA DE SOFTWARE DE ELITE.
     FOCO: PRECISÃO, RIGOR TÉCNICO E FIDELIDADE AOS FATOS.
     - É PROIBIDO inventar funcionalidades ou elementos visuais que não existam no código.
@@ -47,11 +65,7 @@ const getPromptForRole = (role: AgentRole, code: string, context?: string, userM
       1. ANALISE o layout principal (Flex, Grid, Containers).
       2. IDENTIFIQUE componentes de entrada (Inputs, Buttons) e saída (Tables, Cards, Lists).
       3. MAPEE a hierarquia tipográfica e cores detectadas (especialmente classes Tailwind).
-      4. DETERMINE a Proposta de Valor Visual: o que o usuário sente ao olhar para esta tela?
-      
-      PARA O 'imagePrompt':
-      Crie uma descrição técnica para um gerador de diagramas. 
-      Foque em ESTRUTURA, não em estilo artístico.`,
+      4. DETERMINE a Proposta de Valor Visual.`,
 
     BUSINESS_VISIONARY: `${systemBase}
       MISSÃO: CPO & Estrategista. Analise market fit e maturidade comercial baseada no código.`,
@@ -73,7 +87,7 @@ const getPromptForRole = (role: AgentRole, code: string, context?: string, userM
   return prompts[role] || prompts.ORCHESTRATOR;
 };
 
-export const runAgentStep = async (role: AgentRole, code: string, context?: string, userMessage?: string): Promise<{text: string, sources?: any[]}> => {
+export const runAgentStep = async (role: AgentRole, code: string, context?: string, userMessage?: string, persona: AuditorPersona = 'SENIOR'): Promise<{text: string, sources?: any[]}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const isComplex = role !== 'CHAT' && role !== 'VERIFIER';
@@ -91,36 +105,25 @@ export const runAgentStep = async (role: AgentRole, code: string, context?: stri
       config.responseSchema = {
         type: Type.OBJECT,
         properties: {
-          valueProposition: { 
-            type: Type.STRING, 
-            description: "A essência técnica da interface baseada no código analisado." 
-          },
-          persona: { 
-            type: Type.STRING, 
-            description: "Perfil de usuário técnico ou final para o qual este código foi otimizado." 
-          },
+          valueProposition: { type: Type.STRING },
+          persona: { type: Type.STRING },
           steps: {
             type: Type.ARRAY,
-            description: "Fluxos visuais ou seções da tela identificadas.",
             items: {
               type: Type.OBJECT,
               properties: {
-                step: { type: Type.STRING, description: "Nome do componente ou seção." },
-                verdict: { type: Type.STRING, description: "Análise técnica do impacto visual." },
-                imagePrompt: { type: Type.STRING, description: "Descrição do wireframe para geração de imagem." }
+                step: { type: Type.STRING },
+                verdict: { type: Type.STRING },
+                imagePrompt: { type: Type.STRING }
               },
               required: ["step", "verdict", "imagePrompt"]
             }
           },
           improvements: {
             type: Type.ARRAY,
-            description: "Lista de sugestões técnicas de melhoria para a UI/UX baseada no código.",
             items: { type: Type.STRING }
           },
-          finalReport: { 
-            type: Type.STRING, 
-            description: "Conclusão da auditoria visual." 
-          }
+          finalReport: { type: Type.STRING }
         },
         required: ["valueProposition", "persona", "steps", "improvements", "finalReport"]
       };
@@ -129,7 +132,7 @@ export const runAgentStep = async (role: AgentRole, code: string, context?: stri
     const response = await ai.models.generateContent({
       model: modelName,
       config: config,
-      contents: getPromptForRole(role, code, context, userMessage),
+      contents: getPromptForRole(role, code, context, userMessage, persona),
     });
 
     return {
